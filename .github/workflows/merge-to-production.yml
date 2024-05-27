@@ -1,6 +1,5 @@
 name: Merge main to production
 
-# Este workflow se ejecuta en cada push a main
 on:
   push:
     branches:
@@ -14,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Necesario para realizar operaciones de git fetch y push
+          fetch-depth: 0
 
       - name: Set up Git user
         run: |
@@ -22,7 +21,9 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Merge main into production
+        env:
+          GITHUB_TOKEN: ${{ secrets.ACTIONS_PAT }}
         run: |
           git checkout production
           git merge main --no-ff --no-edit
-          git push origin production
+          git push https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/<tu-usuario>/<tu-repositorio>.git production
