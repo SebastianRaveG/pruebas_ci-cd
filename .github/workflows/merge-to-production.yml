@@ -1,0 +1,28 @@
+name: Merge main to production
+
+# Este workflow se ejecuta en cada push a main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Necesario para realizar operaciones de git fetch y push
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Merge main into production
+        run: |
+          git checkout production
+          git merge main --no-ff --no-edit
+          git push origin production
