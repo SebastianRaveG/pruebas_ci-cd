@@ -1,0 +1,27 @@
+name: Deploy in production server
+
+on:
+  push:
+    branches: [ "production" ]
+  pull_request:
+    branches: [ "production" ]
+
+  workflow_dispatch:
+
+jobs:
+  run_pull:
+    name: run pull
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            port: ${{ secrets.PORT }}
+            script: |
+                cd /root/pruebas_ci-cd
+                git pull
+                exit
