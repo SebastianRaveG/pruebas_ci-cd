@@ -5,30 +5,33 @@ on:
     branches: [ "production" ]
   pull_request:
     branches: [ "production" ]
-
   workflow_dispatch:
 
 jobs:
   run_pull:
-    name: run pull
+    name: Run git pull on production server
     runs-on: ubuntu-latest
 
     steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
-  
-        - name: Install sshpass
-          run: sudo apt-get update && sudo apt-get install -y sshpass
-  
-        - name: Execute remote ssh commands using password
-          env:
-            SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-            HOST: ${{ secrets.HOST }}
-            USERNAME: ${{ secrets.USERNAME }}
-            PORT: ${{ secrets.PORT }}
-          run: |
-            sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no -p $PORT $USERNAME@$HOST << EOF
-              cd /root/pruebas_ci-cd
-              git pull
-              exit
-            EOF
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install ssh client
+        run: sudo apt-get update && sudo apt-get install -y openssh-client
+
+      - name: Add SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: Execute remote ssh commands
+        env:
+          HOST: ${{ secrets.HOST }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p $PORT $USERNAME@$HOST << 'EOF'
+            cd /root/pruebas_ci-cd
+            git pull
+            exit
+          EOF
