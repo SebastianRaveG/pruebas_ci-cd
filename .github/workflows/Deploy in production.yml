@@ -14,14 +14,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: executing remote ssh commands using password
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.KEY }}
-            port: ${{ secrets.PORT }}
-            script: |
-                cd /root/pruebas_ci-cd
-                git pull
-                exit
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Install sshpass
+          run: sudo apt-get update && sudo apt-get install -y sshpass
+  
+        - name: Execute remote ssh commands using password
+          env:
+            SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+            HOST: ${{ secrets.HOST }}
+            USERNAME: ${{ secrets.USERNAME }}
+            PORT: ${{ secrets.PORT }}
+          run: |
+            sshpass -p $SSH_PASSWORD ssh -o StrictHostKeyChecking=no -p $PORT $USERNAME@$HOST << EOF
+              cd /root/pruebas_ci-cd
+              git pull
+              exit
+            EOF
